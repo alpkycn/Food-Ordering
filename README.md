@@ -1,0 +1,2 @@
+# Food-Ordering
+Dieses Repository enthält das Backend einer webbasierten Anwendung zur Digitalisierung der Essensbestellung und -ausgabe für Sozial-Arbeiten-Wohnen. Die Anwendung ermöglicht es Verwaltung, Standortleitung, Gruppenleitung und Küchenpersonal, den Bestell- und Ausgabeprozess effizient zu verwalten. Entwickelt mit Spring Boot, JWT-Authentifizierung und einer Microservice-Architektur. Enthält eine REST API für die Kommunikation mit der Datenbank sowie eine CSV-Import-Funktion zur Benutzerverwaltung.
