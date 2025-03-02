@@ -1,0 +1,105 @@
+package com.essensbestellung.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.essensbestellung.entities.FoodOrder;
+
+class FoodOrderServiceTest {
+
+    @Mock
+    private IFoodOrderService foodOrderService;
+
+    private FoodOrder mockOrder;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        // Beispiel-Daten initialisieren
+        mockOrder = new FoodOrder();
+        mockOrder.setId(1L);
+        mockOrder.setName("Pizza Margherita");
+    }
+
+    @Test
+    void testGetOrderById() {
+       // Mock-Service erstellen
+        IFoodOrderService foodOrderService = mock(IFoodOrderService.class);
+
+        // Beispiel-Daten selbst erstelle
+        FoodOrder mockOrder = new FoodOrder();
+        mockOrder.setId(1L);
+        mockOrder.setName("Pizza Margherita");
+        mockOrder.setUser(new User()); // User-Referenz setzen
+        mockOrder.setOrderdate(LocalDate.now());
+        mockOrder.setMealtype(MealType.LUNCH);
+        mockOrder.setWith_salad(true);
+        mockOrder.setStatus(OrderStatus.BESTELLT);
+        mockOrder.setLast_changed(LocalDateTime.now());
+
+        // Mock-Verhalten definieren
+        when(foodOrderService.getOrderbyId(1L)).thenReturn(mockOrder);
+
+        // Methode testen
+        FoodOrder result = foodOrderService.getOrderbyId(1L);
+
+        // Assertions
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Pizza Margherita", result.getName());
+        assertEquals(MealType.LUNCH, result.getMealtype());
+        assertEquals(OrderStatus.BESTELLT, result.getStatus());
+    }
+
+    @Test
+    void testSaveOrder() {
+        // Mock-Verhalten definieren
+        when(foodOrderService.saveOrder(mockOrder)).thenReturn(mockOrder);
+
+        // Test ausführen
+        FoodOrder result = foodOrderService.saveOrder(mockOrder);
+
+        // Ergebnis überprüfen
+        assertNotNull(result);
+        assertEquals("Pizza Margherita", result.getName());
+
+        // Sicherstellen, dass Methode exakt einmal aufgerufen wird
+        verify(foodOrderService, times(1)).saveOrder(mockOrder);
+    }
+
+    @Test
+    void testGetAllOrders() {
+        // MockListe erstellen
+        List<FoodOrder> mockOrders = Arrays.asList(mockOrder);
+        when(foodOrderService.getAllOrders()).thenReturn(mockOrders);
+
+        // Test ausführen
+        List<FoodOrder> result = foodOrderService.getAllOrders();
+
+        // Ergebnis überpruefen
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Pizza Margherita", result.get(0).getName());
+
+        // Sicherstellen, dass Methode exakt einmal aufgerufen wird
+        verify(foodOrderService, times(1)).getAllOrders();
+    }
+
+    @Test
+    void testDeleteOrder() {
+        // Test ausfuehren
+        foodOrderService.deleteOrder(1L);
+
+        // Sicherstellen, dass Methode exakt einmal aufgerufen wurde
+        verify(foodOrderService, times(1)).deleteOrder(1L);
+   } 
+}

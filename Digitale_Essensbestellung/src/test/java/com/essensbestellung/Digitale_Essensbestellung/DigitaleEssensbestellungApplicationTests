@@ -1,0 +1,58 @@
+package com.essensbestellung.Digitale_Essensbestellung;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import com.essensbestellung.csv.CsvImportService;
+import com.essensbestellung.entities.Groups;
+import com.essensbestellung.repository.IGruppenRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class GroupImportTest {
+
+    @Autowired
+    private CsvImportService csvImportService;
+
+    @Autowired
+    private IGruppenRepository groupsRepository;
+
+    @BeforeEach
+    void cleanDatabase() {
+        groupsRepository.deleteAll();
+    }
+
+    @Test
+    public void testImportUsersLocationsGroupsFromCsv() throws Exception {
+        // Datei laden
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("Testdaten copy.csv");
+        if (inputStream == null) {
+            throw new IllegalArgumentException("Die Datei 'Testdaten copy.csv' wurde nicht gefunden.");
+        }
+
+        // Temporäre Datei erstellen
+        Path tempFile = Files.createTempFile("Testdaten", ".csv");
+        Files.copy(inputStream, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        try {
+            // Erwartete Anzahl an Gruppen
+            int expectedGroupCount = 31;
+
+            // CSV-Daten importieren
+            csvImportService.importGroupsFromCsv(tempFile.toString());
+
+            // Ergebnisse prüfen
+            List<Groups> allGroups = groupsRepository.findAll();
+            assertEquals(expectedGroupCount, allGroups.size(), "Gruppenanzahl stimmt nicht überein!");
+        } finally {
+            // Temporäre Datei löschen
+            Files.deleteIfExists(tempFile);
+        }
+    }
+}

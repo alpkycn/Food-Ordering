@@ -1,0 +1,68 @@
+package com.essensbestellung.Digitale_Essensbestellung;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.List;
+import com.essensbestellung.csv.CsvImportService;
+import com.essensbestellung.entities.User;
+import com.essensbestellung.repository.IGruppenRepository;
+import com.essensbestellung.repository.IUserRepository;
+import com.essensbestellung.starter.DigitaleEssensbestellungApplication;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import javax.sql.DataSource;
+import java.nio.file.Path;
+import java.nio.file.Files;
+
+
+@SpringBootTest(classes = {DigitaleEssensbestellungApplication.class})
+public class UsersImportTest {
+    @Autowired
+    private CsvImportService csvImportService;
+
+
+
+    @Autowired
+    private IUserRepository userRepository;
+
+    @Autowired
+    private DataSource dataSource;  // DataSource to refresh connection
+
+    @BeforeEach
+    void cleanDatabase() {
+        userRepository.deleteAll();
+    }
+
+
+    @Test
+    public void testImportUsersLocationsGroupsFromCsv() throws Exception {
+        // Use ClassLoader to access the file in the resources folder
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream("Testdaten.csv");
+
+        if (inputStream == null) {
+            throw new FileNotFoundException("File 'Testdaten.csv' not found in resources folder.");
+        }
+
+        // Create a temporary file from the InputStream
+        Path tempFile = Files.createTempFile("Testdaten", ".csv");
+        Files.copy(inputStream, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        String filePath = tempFile.toString(); 
+
+        int expectedGroupCount = 310;
+
+        csvImportService.importUsersFromCsv(filePath);
+
+        List<User> allUsers = userRepository.findAll();
+        System.out.println("Number of users imported: " + allUsers.size());
+        assertEquals(expectedGroupCount, allUsers.size(), "Groups count mismatch!");
+
+        // Cleanup the temporary file
+        Files.delete(tempFile);
+    }
+
+}
